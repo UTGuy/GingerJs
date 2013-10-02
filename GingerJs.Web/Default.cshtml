@@ -1,0 +1,80 @@
+﻿@{
+    Layout = "~/_SiteLayout.cshtml";
+    Page.Title = "Home Page";
+}
+
+@* header *@
+<script type="text/javascript">
+
+    (function() {
+
+        // setup a namespace ( 'this' refers to 'window' while in a browser )
+        this.t33 = {
+            models: {},
+            i18n: {},
+            urls: {}
+        };
+
+        var initialData = {
+            NullValue: null,
+            StringValue: "my string",
+            DateValue: new Date(),
+            NumberValue: new Number(),
+            FloatValue: 99.9,
+            IntValue: 88,
+            ObjectValue: {
+                Id: 1,
+                Name: "object 1"
+            },
+            BasicArrayValue: [1, 2, 3],
+            ComplexArrayValue: [
+                { Id: 1, Name: "array 1" },
+                { Id: 2, Name: "array 2" },
+                { Id: 3, Name: "array 3" }
+            ]
+        };
+
+        Ginger.setPageData(initialData);
+
+    })();
+</script>
+
+<div id="fluentRoot">
+    
+    <div data-bind="text: StringValue"></div>
+    <div data-bind="text: SearchText"></div>
+    
+    <div data-bind="foreach: ComplexArrayValue">
+        <div>
+            <span data-bind="text: NameAndId"></span>
+            <a href="#" data-bind="click: $root.removeFoo">remove</a>
+        </div>
+    </div>
+    <a href="#" data-bind="click: addFoo">+add foo</a>
+</div>
+
+@* page *@
+<script type="text/javascript">
+    (function () {
+
+        t33.i18n.MapTest = {
+            SearchText: 'Please enter search text',
+            ConfirmRemovalMessage: "Are you sure you want to remove: "
+        };
+
+        t33.urls.MapTest = {
+            GetFoos: 'http://www.yahoo.com/',
+            RemoveFoo: 'http://www.google.com/'
+        };
+
+    })();
+</script>
+
+<script type="text/javascript" src="JsModels/MapTest.js"></script>
+<script type="text/javascript" src="JsModels/ReferenceEntity.js"></script>
+
+
+@* footer *@
+<script type="text/javascript">
+    Ginger.runEngine();
+</script>

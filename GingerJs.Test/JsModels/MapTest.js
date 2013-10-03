@@ -54,7 +54,7 @@
     // Ui Methods for MapTestModel
     function myUi() {
         this.ConfirmRemoval = function(foo) {
-            return confirm(i18N.ConfirmRemovalMessage + foo.Name());
+            return confirm(i18N.MapTest.ConfirmRemovalMessage + foo.Name());
         };
     }
 

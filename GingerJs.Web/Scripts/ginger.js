@@ -1,12 +1,14 @@
 ﻿(function(ko) {
 
     var rootModels = [],
-        pageModel = null,
-        pageData = null;
-
-    var settings = {
-        pageContainer: "body"
-    };
+        page = {
+            model: null,
+            data: null
+        },
+        settings = {
+            pageContainer: "body",
+            autoProperty: true,
+        };
 
     // Assigns a new var to the window namespace
     this.Ginger = function() {
@@ -25,6 +27,18 @@
         return (typeof prop == "function") ? new prop() : prop || {};
     }
 
+    function includeProperties(model, map) {
+        if (typeof map.include == "undefined") {
+            var include = [];
+            for (var prop in model) {
+                var value = ko.utils.unwrapObservable(this[prop]);
+                if (typeof value != "function")
+                    include.push(prop);
+            }
+            map.include = include;
+        }
+    }
+
     Ginger.settings = function(options) {
         if (typeof options != "object") return;
         for (var prop in options) {
@@ -36,15 +50,7 @@
         return function(data) {
             model.call(this, getObjOrFunc(dataAccess), getObjOrFunc(ui));
             map = getObjOrFunc(map);
-            if (typeof map.include == "undefined") {
-                var include = [];
-                for (var prop in this) {
-                    var value = ko.utils.unwrapObservable(this[prop]);
-                    if (typeof value != "function")
-                        include.push(prop);
-                }
-                map.include = include;
-            }
+            if (settings.autoProperty) includeProperties(this, map);
             return ko.mapping.fromJS(data, map, this);
         };
     };
@@ -54,16 +60,16 @@
     };
 
     Ginger.setPageModel = function(model) {
-        pageModel = model;
+        page.model = model;
     };
 
     Ginger.setPageData = function(data) {
-        pageData = data;
+        page.data = data;
     };
 
     Ginger.runEngine = function() {
-        if (pageModel) {
-            Ginger.addRootModel(pageModel, pageData, settings.pageContainer);
+        if (page.model) {
+            Ginger.addRootModel(page.model, page.data, settings.pageContainer);
         }
 
         for (var i = 0; i < rootModels.length; i++) {

@@ -58,6 +58,11 @@
         this.ui = getObjOrFunc(ui);
     }
 
+    Ginger.bindModelWithBase = function(model, base, map, dataAccess, ui) {
+        model.base = base;
+        return Ginger.bindModel(model, map, dataAccess, ui);
+    };
+    
     Ginger.bindModel = function(model, map, dataAccess, ui) {
         if (model.base) setBase(model, model.base);
 

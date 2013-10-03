@@ -27,7 +27,7 @@
     });
 
     q.test("View Model is instanceof MyClassModel", function() {
-
+        
         function MyClassModel() {
             this.Id = ko.observable('');
         }
@@ -36,6 +36,23 @@
         var vm = new myClass();
 
         q.equal(vm instanceof MyClassModel, true);
+    });
+    
+    q.test("View Model is instanceof MySubClassModel", function () {
+
+        function MySubClassModel() {
+            this.Id = ko.observable('');
+        }
+        var mySubClass = app.bindModel(MySubClassModel);
+        
+        function MyClassModel() {
+            this.Name = ko.observable('');
+        }
+
+        var myClass = app.bindModelWithBase(MyClassModel, mySubClass);
+        var vm = new myClass();
+
+        q.equal(vm instanceof MySubClassModel, true);
     });
 
 })(QUnit, Ginger, ko);

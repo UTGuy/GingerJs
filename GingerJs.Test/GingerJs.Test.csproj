@@ -77,6 +77,8 @@
     </Content>
     <Content Include="JsModels\MapTest.test.js" />
     <Content Include="JsModels\ReferenceEntity.test.js" />
+    <Content Include="MockGinger.js" />
+    <Content Include="Scripts\ginger.test.js" />
     <Content Include="UnitTestSetup.js" />
     <Content Include="Web.config" />
   </ItemGroup>

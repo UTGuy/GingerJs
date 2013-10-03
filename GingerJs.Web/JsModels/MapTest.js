@@ -68,7 +68,7 @@
 
     models.MapTest = app.bindModel(MapTestModel, myMap, myDataAccess, myUi);
     app.setPageModel(models.MapTest);
-
+    console.log(models.MapTest);
     // mock $.post
     $.post = function(/*url, data*/) {
         return {

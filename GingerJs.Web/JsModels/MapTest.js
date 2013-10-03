@@ -7,13 +7,13 @@
         var self = this;
 
         // Public Properties
-        self.StringValue = ko.observable('');
-        self.SearchText = ko.observable(i18N.MapTest.SearchText);
-        self.ObjectValue = ko.observable();
-        self.ComplexArrayValue = ko.observableArray();
+        this.StringValue = ko.observable('');
+        this.SearchText = ko.observable(i18N.MapTest.SearchText);
+        this.ObjectValue = ko.observable();
+        this.ComplexArrayValue = ko.observableArray();
 
         // Public Methods
-        self.getData = function() {
+        this.getData = function () {
             da.GetFoos().success(function(newFoo) {
                 ko.mapping.fromJS(newFoo, self.Foos);
             }).error(function() {
@@ -21,7 +21,7 @@
             });
         };
 
-        self.removeFoo = function(foo) {
+        this.removeFoo = function (foo) {
             if (!ui.ConfirmRemoval(foo)) return;
             da.RemoveFoo(foo.Id).success(function(newFoo) {
                 self.ComplexArrayValue.remove(foo);
@@ -30,7 +30,7 @@
             });
         };
 
-        self.addFoo = function() {
+        this.addFoo = function () {
             var id = self.ComplexArrayValue().length + 1;
             var foo = new models.ReferenceEntity({
                 Id: id,
@@ -68,7 +68,7 @@
 
     models.MapTest = app.bindModel(MapTestModel, myMap, myDataAccess, myUi);
     app.setPageModel(models.MapTest);
-    console.log(models.MapTest);
+    console.log("MapTest ", models.MapTest);
     // mock $.post
     $.post = function(/*url, data*/) {
         return {

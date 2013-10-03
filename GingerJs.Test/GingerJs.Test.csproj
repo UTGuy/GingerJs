@@ -69,6 +69,9 @@
     <Content Include="..\GingerJs.Web\Scripts\ginger.mapping.js">
       <Link>Scripts\ginger.mapping.js</Link>
     </Content>
+    <Content Include="..\GingerJs.Web\Scripts\jquery-1.8.2.js">
+      <Link>Scripts\jquery-1.8.2.js</Link>
+    </Content>
     <Content Include="..\GingerJs.Web\Scripts\knockout-2.2.0.debug.js">
       <Link>Scripts\knockout-2.2.0.debug.js</Link>
     </Content>

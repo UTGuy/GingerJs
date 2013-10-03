@@ -14,12 +14,6 @@
         }
     });
 
-    //q.test("ReferenceEntity is an Entity", function() {
-    //    var vm = new t33.models.ReferenceEntity();
-    //    q.equal(vm instanceof t33.models.ReferenceEntity, true);
-    //    q.equal(vm instanceof t33.models.Entity, true);
-    //});
-
     q.test("NameAndId returns name and id", function() {
         var vm = new t33.models.ReferenceEntity();
         vm.Id(1);

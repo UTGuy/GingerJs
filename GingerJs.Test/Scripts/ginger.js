@@ -1,4 +1,8 @@
-﻿(function(ko) {
+﻿(function($, ko) {
+
+    // Assigns a new var to the window namespace
+    this.Ginger = function() {
+    };
 
     var rootModels = [],
         page = {
@@ -10,8 +14,11 @@
             autoProperty: true,
         };
 
-    // Assigns a new var to the window namespace
-    this.Ginger = function() {
+    Ginger.settings = function(options) {
+        if (typeof options != "object") return;
+        for (var prop in options) {
+            settings[prop] = options[prop];
+        }
     };
 
     function GingerRoot(model, data, container) {
@@ -21,10 +28,6 @@
                 ko.applyBindings(vm, this);
             });
         };
-    }
-
-    function getObjOrFunc(prop) {
-        return (typeof prop == "function") ? new prop() : prop || {};
     }
 
     function includeProperties(model, map) {
@@ -39,20 +42,35 @@
         }
     }
 
-    Ginger.settings = function(options) {
-        if (typeof options != "object") return;
-        for (var prop in options) {
-            settings[prop] = options[prop];
+    function setBase(model, base) {
+        model.prototype = base.prototype;
+        model.prototype.constructor = base;
+    }
+
+    function GingerModelParams(map, dataAccess, ui) {
+
+        function getObjOrFunc(prop) {
+            return (typeof prop == "function") ? new prop() : prop || {};
         }
-    };
+
+        this.map = getObjOrFunc(map);
+        this.dataAccess = getObjOrFunc(dataAccess);
+        this.ui = getObjOrFunc(ui);
+    }
 
     Ginger.bindModel = function(model, map, dataAccess, ui) {
-        return function(data) {
-            model.call(this, getObjOrFunc(dataAccess), getObjOrFunc(ui));
-            map = getObjOrFunc(map);
-            if (settings.autoProperty) includeProperties(this, map);
-            return ko.mapping.fromJS(data, map, this);
-        };
+        if (model.base) setBase(model, model.base);
+
+        function GingerModel(data) {
+            var values = new GingerModelParams(map, dataAccess, ui);
+            //if (model.base) model.base.call(this, values.dataAccess, values.ui);
+            model.call(this, values.dataAccess, values.ui);
+            if (settings.autoProperty) includeProperties(this, values.map);
+            ko.mapping.fromJS(data, values.map, this);
+        }
+
+        setBase(GingerModel, model);
+        return GingerModel;
     };
 
     Ginger.addRootModel = function(model, data, container) {
@@ -77,4 +95,4 @@
         }
     };
 
-})(ko);
+})(jQuery, ko);

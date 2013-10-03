@@ -1,4 +1,4 @@
-﻿(function(ko) {
+﻿(function($, ko) {
 
     var rootModels = [],
         page = {
@@ -77,4 +77,4 @@
         }
     };
 
-})(ko);
+})(jQuery, ko);

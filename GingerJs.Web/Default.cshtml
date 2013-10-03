@@ -6,14 +6,7 @@
 @* header *@
 <script type="text/javascript">
 
-    (function() {
-
-        // setup a namespace ( 'this' refers to 'window' while in a browser )
-        this.t33 = {
-            models: {},
-            i18n: {},
-            urls: {}
-        };
+    (function(app) {
 
         var initialData = {
             NullValue: null,
@@ -34,12 +27,12 @@
             ]
         };
 
-        Ginger.setPageData(initialData);
+        app.setPageData(initialData);
 
-    })();
+    })(Ginger);
 </script>
 
-<div id="fluentRoot">
+<div id="MyRoot">
     
     <div data-bind="text: StringValue"></div>
     <div data-bind="text: SearchText"></div>
@@ -55,26 +48,20 @@
 
 @* page *@
 <script type="text/javascript">
-    (function () {
+    (function(i18N, urls) { // namespace
 
-        t33.i18n.MapTest = {
+        i18N.MapTest = {
             SearchText: 'Please enter search text',
             ConfirmRemovalMessage: "Are you sure you want to remove: "
         };
 
-        t33.urls.MapTest = {
+        urls.MapTest = {
             GetFoos: 'http://www.yahoo.com/',
             RemoveFoo: 'http://www.google.com/'
         };
 
-    })();
+    })(t33.i18n, t33.urls);
 </script>
 
-<script type="text/javascript" src="JsModels/MapTest.js"></script>
-<script type="text/javascript" src="JsModels/ReferenceEntity.js"></script>
-
-
-@* footer *@
-<script type="text/javascript">
-    Ginger.runEngine();
-</script>
+<script type="text/javascript" src="JsModels/MapTest.js"> </script>
+<script type="text/javascript" src="JsModels/ReferenceEntity.js"> </script>

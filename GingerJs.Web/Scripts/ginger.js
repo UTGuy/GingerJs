@@ -11,7 +11,7 @@
         },
         settings = {
             pageContainer: "body",
-            autoProperty: true,
+            autoProperty: true
         };
 
     Ginger.settings = function(options) {

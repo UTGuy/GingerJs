@@ -3,4 +3,4 @@ GingerJs
 
 An IOC framework for Knockout
 
-please see: Default.html for an example
+please see: <a href="https://github.com/UTGuy/GingerJs/blob/master/GingerJs.Web/Default.cshtml">example</a>

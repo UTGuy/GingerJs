@@ -80,6 +80,7 @@
     <Content Include="JsModels\ReferenceEntity.js" />
     <Content Include="Scripts\ginger.js" />
     <Content Include="Scripts\ginger.mapping.js" />
+    <Content Include="GingerJs.1.0.0.nupkg" />
     <None Include="Scripts\jquery-1.8.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.8.2.js" />
     <Content Include="Scripts\jquery-1.8.2.min.js" />

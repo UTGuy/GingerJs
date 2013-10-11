@@ -34,7 +34,7 @@
         if (typeof map.include == "undefined") {
             var include = [];
             for (var prop in model) {
-                var value = ko.utils.unwrapObservable(this[prop]);
+                var value = ko.utils.unwrapObservable(model[prop]);
                 if (typeof value != "function")
                     include.push(prop);
             }

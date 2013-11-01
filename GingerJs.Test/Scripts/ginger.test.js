@@ -99,4 +99,58 @@
         q.equal(typeof id2 == "undefined", true);
     });
 
+    q.test("Base property 'Other' is instanceof OtherClassModel", function() {
+
+        function OtherClassModel() {
+
+        }
+
+        var otherClass = app.bindModel(OtherClassModel);
+
+        function MyBaseClassModel() {
+            this.Other = ko.observable();
+        }
+
+        function myBaseClassMap() {
+            return new app.Map({
+                "Other": otherClass
+            });
+        }
+
+        var myBaseClass = app.bindModel(MyBaseClassModel, myBaseClassMap);
+
+        function MyClassModel() {
+            MyClassModel.base.apply(this, arguments);
+        }
+
+        var myClass = app.bindModelWithBase(MyClassModel, myBaseClass);
+
+        var vm = new myClass({ Other: {} });
+        q.equal(vm.Other() instanceof OtherClassModel, true);
+    });
+
+    q.test("Unmapping test", function() {
+
+        function MyClassModel() {
+            this.ObjectValue = ko.observable();
+            this.ArrayValue = ko.observableArray();
+            this.ComputedValue = ko.computed(function() {
+                return "foo";
+            });
+            this.FunctionValue = function() {
+                return "bar";
+            };
+        }
+
+        var myClass = app.bindModel(MyClassModel);
+        var vm = new myClass();
+        var json = ko.mapping.toJS(vm);
+        q.equal(typeof json.__ko_mapping__, "undefined", "__ko_mapping__ should be undefined");
+        q.equal(json.ObjectValue, undefined, "ObjectValue should be null");
+        q.equal(json.ArrayValue.length, 0, "ArrayValue should be and empty array");
+        q.equal(json.ComputedValue, "foo", "ComputedValue should be foo");
+        q.equal(typeof json.FunctionValue, "undefined", "FunctionValue should be undefined");
+
+    });
+
 })(QUnit, Ginger, ko);

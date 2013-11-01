@@ -1,6 +1,12 @@
 ﻿/// <reference path="ReferenceEntity.js" />
 (function($, app, ko, models, i18N, urls) {
 
+    function OtherModel() {
+        
+    }
+
+    models.OtherModel = app.bindModel(OtherModel);
+    
     // View Model Class
     function MapTestModel(da, ui) {
         // Private Properties
@@ -11,6 +17,7 @@
         this.SearchText = ko.observable(i18N.MapTest.SearchText);
         this.ObjectValue = ko.observable();
         this.ComplexArrayValue = ko.observableArray();
+        this.OtherValue = ko.observable();
 
         // Public Methods
         this.getData = function () {
@@ -62,7 +69,8 @@
     function myMap() {
         return new app.Map({
             "ObjectValue": models.ReferenceEntity,
-            "ComplexArrayValue": models.ReferenceEntity
+            "ComplexArrayValue": models.ReferenceEntity,
+            "OtherValue": models.OtherModel
         });
     }
 

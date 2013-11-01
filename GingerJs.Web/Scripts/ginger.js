@@ -85,7 +85,7 @@
             if( model.base ) model.base.call( this, data );
             model.call( this, values.dataAccess, values.ui );
             if( settings.autoProperty ) includeProperties( this, values.map );
-            if( settings.autoProperty ) ignoreProperties( data, values.map );
+            //if( settings.autoProperty ) ignoreProperties( data, values.map );
             ko.mapping.fromJS( data, values.map, this );
             if( typeof this.load == "function" ) this.load();
         }

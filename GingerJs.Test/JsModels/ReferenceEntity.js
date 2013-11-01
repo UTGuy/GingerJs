@@ -8,7 +8,7 @@
 
     function ReferenceEntity() {
         // No longer required as of 1.0.3
-        //ReferenceEntity.base.apply(this, arguments);
+        // ReferenceEntity.base.apply(this, arguments);
 
         var self = this;
         this.Name = ko.observable('');

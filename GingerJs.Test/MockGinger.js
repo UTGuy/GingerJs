@@ -4,7 +4,11 @@
     },
     bindModelWithBase: function(model, base) {
         model.base = base;
-        return Ginger.bindModel(model);
+        var m = model;
+        return Ginger.bindModel(function() {
+            base.apply(this, arguments);
+            return m.apply(this, arguments);
+        });
     },
     setPageModel: function () {
         // do nothing

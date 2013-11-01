@@ -7,7 +7,8 @@
     models.Entity = app.bindModel(Entity);
 
     function ReferenceEntity() {
-        ReferenceEntity.base.apply(this, arguments);
+        // No longer required as of 1.0.3
+        //ReferenceEntity.base.apply(this, arguments);
 
         var self = this;
         this.Name = ko.observable('');

@@ -4,7 +4,7 @@
 (function(q, app, ko) {
 
     // Uncomment this to debug
-    q.moduleDone = function () {
+    q.moduleDone = function() {
     };
 
     q.module("Ginger", {
@@ -126,8 +126,11 @@
 
         var myClass = app.bindModelWithBase(MyClassModel, myBaseClass);
 
-        var vm = new myClass({ Other: {} });
-        q.equal(vm.Other() instanceof OtherClassModel, true);
+        var vm = new myClass({ Other: { Id: 1 } });
+        
+        var other = vm.Other();
+        q.equal(other.Id(), 1);
+        q.equal(other instanceof OtherClassModel, true);
     });
 
     q.test("Unmapping test", function() {
@@ -167,6 +170,158 @@
         var myClass = app.bindModel(MyClassModel);
         var vm = new myClass();
         q.equal(vm.Name(), "foo");
+    });
+
+    q.test("Base Load test", function() {
+
+        function MySubClassModel() {
+            var self = this;
+            this.Id = ko.observable(0);
+            this.load = function() {
+                self.Id(1);
+            };
+        }
+
+        var mySubClassModel = app.bindModel(MySubClassModel);
+
+        function MyClassModel() {
+            var self = this;
+            this.Name = ko.observable('');
+            this.load = function() {
+                self.Name("foo");
+            };
+        }
+
+        var myClass = app.bindModelWithBase(MyClassModel, mySubClassModel);
+        var vm = new myClass();
+        q.equal(vm.Name(), "foo");
+        q.equal(vm.Id(), 1);
+    });
+
+    q.test("Base class data mapping", function() {
+
+        function OtherClassModel() {
+            this.Id = ko.observable();
+        }
+
+        var otherClass = app.bindModel(OtherClassModel);
+
+        function MyBaseClassModel() {
+            this.Name = ko.observable();
+            this.Other = ko.observable(new otherClass());
+        }
+
+        function myBaseClassMap() {
+            return new app.Map({
+                "Other": otherClass
+            });
+        }
+
+        var myBaseClass = app.bindModel(MyBaseClassModel, myBaseClassMap);
+
+        function MyClassModel() {
+        }
+
+        var myClass = app.bindModelWithBase(MyClassModel, myBaseClass);
+
+        var vm = new myClass({ Other: { Id: 1 } });
+        q.equal(vm.Other().Id(), 1);
+
+    });
+
+    q.test("Sub-class mapping of base class property array", function() {
+
+        function ComplexIdModel() {
+            this.Id = ko.observable(999);
+        }
+
+        var complexId = app.bindModel(ComplexIdModel);
+
+        function ComplexNameModel() {
+            this.Name = ko.observable('abc');
+        }
+
+        var complexName = app.bindModel(ComplexNameModel);
+
+        function SearchResultModel() {
+            this.Items = ko.observableArray();
+        }
+
+        var searchResult = app.bindModel(SearchResultModel);
+
+        function NameSearchResultItemModel() {
+            this.IdValue = ko.observable(new complexId());
+            this.NameValue = ko.observable(new complexName());
+        }
+
+        function NameSearchResultMap() {
+            return new app.Map({
+                "IdValue": complexId,
+                "NameValue": complexName
+            });
+        }
+
+        var nameSearchResultItem = app.bindModel(NameSearchResultItemModel, NameSearchResultMap);
+
+        function NameSearchResultModel() {
+
+        }
+
+        function NameMap() {
+            return new app.Map({
+                "Items": nameSearchResultItem
+            });
+        }
+
+        var nameSearchResult = app.bindModelWithBase(NameSearchResultModel, searchResult, NameMap);
+
+        function ContainerModel() {
+            this.SearchResult = ko.observable();
+        }
+
+        function ContainerMap() {
+            return new app.Map({
+                "SearchResult": nameSearchResult
+            });
+        }
+
+        var container = app.bindModel(ContainerModel, ContainerMap);
+        var vm = new container();
+        var data = {
+            Items: [
+                { IdValue: { Id: 1 }, NameValue: { Name: 'foo' } },
+                { IdValue: { Id: 2 }, NameValue: { Name: 'bar' } }
+            ]
+        };
+        vm.SearchResult(new nameSearchResult(data));
+
+        var items = vm.SearchResult().Items();
+        q.equal(items.length, 2);
+
+        var first = items[0];
+        q.equal(first.IdValue().Id(), 1);
+        q.equal(first.NameValue().Name(), "foo");
+
+        var second = items[1];
+        q.equal(second.IdValue().Id(), 2);
+        q.equal(second.NameValue().Name(), "bar");
+    });
+
+    q.test("Deferred Computed properties do not get evaluated on auto include of properties", function() {
+        
+        function ContainerModel() {
+            var self = this;
+            this.Value = 0;
+            this.ComputedValue = ko.computed(function() {
+                self.Value++;
+                return self.Value;
+            }, null, { deferEvaluation: true });
+        }
+
+        var container = app.bindModel(ContainerModel);
+        var vm = new container();
+        q.equal(vm.Value, 0, "vm.Value should be false");
+        q.equal(ko.isComputed(vm.ComputedValue), true);
     });
 
 })(QUnit, Ginger, ko);

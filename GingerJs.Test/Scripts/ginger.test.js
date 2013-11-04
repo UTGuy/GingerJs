@@ -4,8 +4,8 @@
 (function(q, app, ko) {
 
     // Uncomment this to debug
-    //q.moduleDone = function () {
-    //};
+    q.moduleDone = function () {
+    };
 
     q.module("Ginger", {
         setup: function() {
@@ -102,7 +102,7 @@
     q.test("Base property 'Other' is instanceof OtherClassModel", function() {
 
         function OtherClassModel() {
-
+            this.Id = ko.observable();
         }
 
         var otherClass = app.bindModel(OtherClassModel);
@@ -120,7 +120,8 @@
         var myBaseClass = app.bindModel(MyBaseClassModel, myBaseClassMap);
 
         function MyClassModel() {
-            MyClassModel.base.apply(this, arguments);
+            // No longer required as of 1.0.3
+            // MyClassModel.base.apply(this, arguments);
         }
 
         var myClass = app.bindModelWithBase(MyClassModel, myBaseClass);
@@ -151,6 +152,21 @@
         q.equal(json.ComputedValue, "foo", "ComputedValue should be foo");
         q.equal(typeof json.FunctionValue, "undefined", "FunctionValue should be undefined");
 
+    });
+
+    q.test("Load test", function() {
+
+        function MyClassModel() {
+            var self = this;
+            this.Name = ko.observable('');
+            this.load = function() {
+                self.Name("foo");
+            };
+        }
+
+        var myClass = app.bindModel(MyClassModel);
+        var vm = new myClass();
+        q.equal(vm.Name(), "foo");
     });
 
 })(QUnit, Ginger, ko);

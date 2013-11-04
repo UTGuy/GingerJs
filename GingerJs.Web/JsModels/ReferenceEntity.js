@@ -15,8 +15,6 @@
         this.NameAndId = ko.computed(function() {
             return self.Id() + ": " + self.Name();
         });
-
-        console.log("this ", this);
     }
 
     models.ReferenceEntity = app.bindModelWithBase(ReferenceEntity, models.Entity);

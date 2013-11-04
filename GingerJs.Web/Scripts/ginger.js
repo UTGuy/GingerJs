@@ -78,16 +78,24 @@
         return Ginger.bindModel( model, map, dataAccess, ui );
     };
 
+    function ApplyModelLoad(instance, model) {
+        if (model.base) ApplyModelLoad(instance, model.base);
+        if (typeof this.load == "function") this.load();
+    }
+
     Ginger.bindModel = function( model, map, dataAccess, ui ) {
 
-        function GingerModel( data ) {
-            var values = new GingerModelParams( map, dataAccess, ui );
-            if( model.base ) model.base.call( this, data );
-            model.call( this, values.dataAccess, values.ui );
-            if( settings.autoProperty ) includeProperties( this, values.map );
+        function GingerModel(data, isBase) {
+            var values = new GingerModelParams(map, dataAccess, ui);
+            if (model.base) {
+                model.base.call(this, data, true);
+            }
+            model.call(this, values.dataAccess, values.ui);
+            if (settings.autoProperty) includeProperties(this, values.map);
             //if( settings.autoProperty ) ignoreProperties( data, values.map );
-            ko.mapping.fromJS( data, values.map, this );
-            if( typeof this.load == "function" ) this.load();
+            if (typeof isBase == "undefined") isBase = false;
+            if (!isBase) ko.mapping.fromJS(data, values.map, this);
+            if (typeof this.load == "function") this.load();
         }
 
         GingerModel.prototype = model.prototype;

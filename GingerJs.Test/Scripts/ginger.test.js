@@ -4,8 +4,8 @@
 (function(q, app, ko) {
 
     // Uncomment this to debug
-    q.moduleDone = function() {
-    };
+    //q.moduleDone = function() {
+    //};
 
     q.module("Ginger", {
         setup: function() {
@@ -127,7 +127,7 @@
         var myClass = app.bindModelWithBase(MyClassModel, myBaseClass);
 
         var vm = new myClass({ Other: { Id: 1 } });
-        
+
         var other = vm.Other();
         q.equal(other.Id(), 1);
         q.equal(other instanceof OtherClassModel, true);
@@ -308,7 +308,7 @@
     });
 
     q.test("Deferred Computed properties do not get evaluated on auto include of properties", function() {
-        
+
         function ContainerModel() {
             var self = this;
             this.Value = 0;
@@ -322,6 +322,65 @@
         var vm = new container();
         q.equal(vm.Value, 0, "vm.Value should be false");
         q.equal(ko.isComputed(vm.ComputedValue), true);
+    });
+
+    q.test("ko.mapping.toJS for mapped properties with no data unmaps with defaults", function() {
+
+        function MyDueDateModel() {
+            this.Id = ko.observable(1);
+        }
+
+        var myDueDate = app.bindModel(MyDueDateModel);
+
+        function ContainerModel() {
+            this.Name = ko.observable('foo');
+            this.DueDate = ko.observable(new myDueDate());
+        }
+
+        function ContainerMap() {
+            return new app.Map({
+                "DueDate": myDueDate
+            });
+        }
+        
+        var container = app.bindModel(ContainerModel, ContainerMap);
+        var vm = new container();
+
+        var json = ko.mapping.toJS(vm);
+        q.equal(json.Name, "foo");
+        q.equal(json.DueDate.Id, 1);
+    });
+    
+    q.test("ko.mapping.toJS for mapped properties with data unmaps with data values", function() {
+
+        function MyDueDateModel() {
+            this.Id = ko.observable(1);
+        }
+
+        var myDueDate = app.bindModel(MyDueDateModel);
+
+        function ContainerModel() {
+            this.Name = ko.observable('foo');
+            this.DueDate = ko.observable(new myDueDate());
+        }
+
+        function ContainerMap() {
+            return new app.Map({
+                "DueDate": myDueDate
+            });
+        }
+        
+        var container = app.bindModel(ContainerModel, ContainerMap);
+        var vm = new container({
+            Name: "bar",
+            DueDate: {
+                Id: 2
+            }
+        });
+
+        var json = ko.mapping.toJS(vm);
+        q.equal(json.Name, "bar");
+        q.equal(json.DueDate.Id, 2);
     });
 
 })(QUnit, Ginger, ko);

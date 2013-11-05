@@ -33,16 +33,15 @@
     function includeProperties(model, map) {
         var defaults = ko.mapping.defaultOptions();
         if (typeof map.include == "undefined" || map.include == defaults.include) {
-            var mapArray = [];
-            for (var mapProp in map) {
-                mapArray.push(mapProp);
-            }
             var include = [];
+            for (var mapProp in map) {
+                include.push(mapProp);
+            }
             for (var prop in model) {
                 var value = ko.isComputed(model[prop]) ? null : ko.utils.unwrapObservable(model[prop]);
-                if (typeof value != "function" &&
-                    $.inArray(prop, defaults.ignore) < 0 &&
-                    $.inArray(prop, mapArray) < 0) {
+                if (typeof value != "function"
+                    && $.inArray(prop, defaults.ignore) < 0
+                    && $.inArray(prop, include) < 0) {
                     include.push(prop);
                 }
             }

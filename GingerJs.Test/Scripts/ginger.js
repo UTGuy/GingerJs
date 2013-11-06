@@ -32,21 +32,19 @@
 
     function includeProperties(model, map) {
         var defaults = ko.mapping.defaultOptions();
-        if (typeof map.include == "undefined" || map.include == defaults.include) {
-            var include = [];
-            for (var mapProp in map) {
-                include.push(mapProp);
-            }
-            for (var prop in model) {
-                var value = ko.isComputed(model[prop]) ? null : ko.utils.unwrapObservable(model[prop]);
-                if (typeof value != "function"
-                    && $.inArray(prop, defaults.ignore) < 0
-                    && $.inArray(prop, include) < 0) {
-                    include.push(prop);
-                }
-            }
-            map.include = include;
+        var include = map.include || [];
+        for (var mapProp in map) {
+            include.push(mapProp);
         }
+        for (var prop in model) {
+            var value = ko.isComputed(model[prop]) ? null : ko.utils.unwrapObservable(model[prop]);
+            if (typeof value != "function"
+                && $.inArray(prop, defaults.ignore) < 0
+                && $.inArray(prop, include) < 0) {
+                include.push(prop);
+            }
+        }
+        map.include = include;
     }
 
     //function ignoreProperties(data, map) {
@@ -77,20 +75,21 @@
         this.ui = $.extend(getObjOrFunc(ui), this.ui || {});
     }
 
-    Ginger.bindModelWithBase = function(model, base, map, dataAccess, ui) {
-        model.base = base;
-        model.prototype = model.base.prototype;
-        model.prototype.constructor = model.base;
-        return Ginger.bindModel(model, map, dataAccess, ui);
-    };
-
     Ginger.bindModel = function(model, map, dataAccess, ui) {
-
+        return Ginger.bindModelWithBase(model, null, map, dataAccess, ui);
+    };
+    
+    Ginger.bindModelWithBase = function(model, base, map, dataAccess, ui) {
+        if (base) {
+            model.prototype = base.prototype;
+            model.prototype.constructor = base;
+        }
+        
         function GingerModel(data, values, isBase) {
             if (typeof values == "undefined" || values == null)
                 values = new GingerModelParams();
             GingerModelParams.call(values, map, dataAccess, ui);
-            if (model.base) model.base.call(this, data, values, true);
+            if (base) base.call(this, data, values, true);
             model.call(this, values.dataAccess, values.ui);
             if (settings.autoProperty) includeProperties(this, values.map);
             //if( settings.autoProperty ) ignoreProperties( data, values.map );

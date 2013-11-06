@@ -342,7 +342,7 @@
                 "DueDate": myDueDate
             });
         }
-        
+
         var container = app.bindModel(ContainerModel, ContainerMap);
         var vm = new container();
 
@@ -350,7 +350,7 @@
         q.equal(json.Name, "foo");
         q.equal(json.DueDate.Id, 1);
     });
-    
+
     q.test("ko.mapping.toJS for mapped properties with data unmaps with data values", function() {
 
         function MyDueDateModel() {
@@ -369,7 +369,7 @@
                 "DueDate": myDueDate
             });
         }
-        
+
         var container = app.bindModel(ContainerModel, ContainerMap);
         var vm = new container({
             Name: "bar",
@@ -381,6 +381,166 @@
         var json = ko.mapping.toJS(vm);
         q.equal(json.Name, "bar");
         q.equal(json.DueDate.Id, 2);
+    });
+
+    q.test("2 classes inheriting from the same base should not have the same name", function() {
+
+        function BaseClassModel() {
+        }
+
+        function ClassAModel() {
+        }
+
+        function ClassBModel() {
+        }
+
+        var baseClass = app.bindModel(BaseClassModel);
+        var classA = app.bindModelWithBase(ClassAModel, baseClass);
+        var classB = app.bindModelWithBase(ClassBModel, baseClass);
+
+        var vmClassA = new classA();
+        var vmClassB = new classB();
+
+        q.equal(vmClassA instanceof ClassAModel, true);
+        q.equal(vmClassB instanceof ClassBModel, true);
+
+        q.equal(vmClassA instanceof BaseClassModel, true);
+        q.equal(vmClassB instanceof BaseClassModel, true);
+    });
+
+    q.test("Unmap test", function() {
+
+        var models = {};
+
+        function Reference() {
+            this.Id = ko.observable(0);
+            this.Name = ko.observable('');
+
+            var self = this;
+            this.Name.subscribe(function(newValue) {
+                if ((newValue || '').length == 0)
+                    self.Id(0);
+            });
+            this.HasValue = ko.computed(function() {
+                var id = self.Id() || "";
+                return id.length > 0 && id > 0;
+            });
+        }
+
+        models.Reference = app.bindModel(Reference);
+
+        function ABObjectReference(da) {
+            var self = this;
+            this.searchAbObjects = function(query, process) {
+                self.Id(0);
+                da.searchAbObjects(query).success(function(data) {
+                    process(data);
+                });
+                return true;
+            };
+            this.selectAbObject = function(item) {
+                self.Id(item.Id);
+                self.Name(item.Name);
+                return item.Name;
+            };
+        }
+
+        models.ABObjectReference = app.bindModelWithBase(ABObjectReference, models.Reference, null, function() {
+            this.searchAbObjects = function(query) {
+                return $.get("SearchAbObjects", query);
+            };
+        });
+
+        function EventReference(da) {
+            var self = this;
+            self.searchEvents = function(query, process) {
+                self.Id(0);
+                da.searchEvents(query).success(function(data) {
+                    process(data);
+                });
+                return true;
+            };
+            self.selectEvent = function(item) {
+                self.Id(item.Id);
+                self.Name(item.Name);
+                return item.Name;
+            };
+        }
+
+        models.EventReference = app.bindModelWithBase(EventReference, models.Reference, null, function() {
+            this.searchEvents = function(query) {
+                return $.get("SearchEvents", query);
+            };
+        });
+
+        function CheckableItem() {
+            this.IsChecked = ko.observable(false);
+        }
+
+        models.CheckableItem = app.bindModel(CheckableItem);
+
+        function ScheduledPayment() {
+            this.Id = ko.observable(0);
+            this.DueDate = ko.observable(new Date());
+            this.Client = ko.observable(new models.ABObjectReference());
+            this.Contact = ko.observable(new models.ABObjectReference());
+            this.Event = ko.observable(new models.EventReference());
+            this.Amount = ko.observable(0.0);
+            this.Allocated = ko.observable(0.0);
+            this.Balance = ko.observable(0.0);
+            this.Note = ko.observable('');
+            this.CurrencyId = ko.observable(1);
+            this.Currency = ko.observable({});
+            this.IsPastDue = ko.observable(false);
+        }
+
+        function myMap() {
+            return new app.Map({
+                "Client": models.ABObjectReference,
+                "Contact": models.ABObjectReference,
+                "Event": models.EventReference
+            });
+        }
+
+        models.ScheduledPayment = app.bindModelWithBase(ScheduledPayment, models.CheckableItem, myMap);
+
+        function ScheduledPaymentEdit() {
+            this.AllowClientEdit = ko.observable(false);
+            this.AllowEventEdit = ko.observable(false);
+            this.AllowCurrencyEdit = ko.observable(false);
+            this.Note = ko.observable('');
+            this.Title = ko.observable('ADD-EDIT-SCHEDULED-PAYMENT');
+        }
+
+        models.ScheduledPaymentEdit = app.bindModelWithBase(ScheduledPaymentEdit, models.ScheduledPayment);
+
+        var vm = new models.ScheduledPaymentEdit();
+
+        var koMapping = vm.__ko_mapping__;
+        var list = "[" + koMapping.include.join("][") + "]";
+
+        function contains(property) {
+            q.equal(list.indexOf("[" + property + "]") > -1, true, property);
+        }
+        
+        contains("Client");
+        contains("Contact");
+        contains("Event");
+        contains("IsChecked");
+        contains("Id");
+        contains("DueDate");
+        contains("Amount");
+        contains("Allocated");
+        contains("Balance");
+        contains("Note");
+        contains("CurrencyId");
+        contains("Currency");
+        contains("IsPastDue");
+        contains("AllowClientEdit");
+        contains("AllowEventEdit");
+        contains("AllowCurrencyEdit");
+        contains("Title");
+        contains("_destroy");
     });
 
 })(QUnit, Ginger, ko);

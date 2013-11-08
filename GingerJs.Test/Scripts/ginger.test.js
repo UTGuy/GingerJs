@@ -4,11 +4,14 @@
 (function(q, app, ko) {
 
     // Uncomment this to debug
-    //q.moduleDone = function() {
-    //};
+    q.moduleDone = function() {
+    };
 
     q.module("Ginger", {
         setup: function() {
+            app.settings({
+                includeComputed: false
+            });
         },
         teardown: function() {
         }
@@ -135,6 +138,10 @@
 
     q.test("Unmapping test", function() {
 
+        app.settings({
+            includeComputed: true
+        });
+        
         function MyClassModel() {
             this.ObjectValue = ko.observable();
             this.ArrayValue = ko.observableArray();
@@ -362,6 +369,9 @@
         function ContainerModel() {
             this.Name = ko.observable('foo');
             this.DueDate = ko.observable(new myDueDate());
+            this.Computed = ko.computed(function() {
+                return "foo";
+            });
         }
 
         function ContainerMap() {
@@ -381,6 +391,7 @@
         var json = ko.mapping.toJS(vm);
         q.equal(json.Name, "bar");
         q.equal(json.DueDate.Id, 2);
+        q.equal(typeof json.Computed == "undefined", true);
     });
 
     q.test("2 classes inheriting from the same base should not have the same name", function() {
@@ -522,7 +533,7 @@
         function contains(property) {
             q.equal(list.indexOf("[" + property + "]") > -1, true, property);
         }
-        
+
         contains("Client");
         contains("Contact");
         contains("Event");
@@ -541,6 +552,51 @@
         contains("AllowCurrencyEdit");
         contains("Title");
         contains("_destroy");
+    });
+
+    q.test("Mapping data properties to read-only computeds should not overwrite the computed", function() {
+
+        function ContainerModel() {
+
+            this.ValueType = 1;
+            this.Observed = ko.observable("abc");
+            
+            this.ReadOnlyComputed = ko.computed(function() {
+                return "foo";
+            });
+
+            var value = ko.observable(1);
+            this.WritableComputed = ko.computed({
+                read: function() {
+                    return value();
+                },
+                write: function(newValue) {
+                    value(newValue);
+                }
+            });
+        }
+
+        var container = app.bindModel(ContainerModel);
+        var vm = new container({
+            NewValue: 999,
+            ValueType: 2,
+            Observed: "xyz",
+            ReadOnlyComputed: "bar",
+            WritableComputed: 2
+        });
+
+        q.equal(ko.isObservable(vm.NewValue), true);
+        q.equal(ko.isObservable(vm.ValueType), false);
+        q.equal(ko.isObservable(vm.Observed), true);
+        q.equal(ko.isComputed(vm.ReadOnlyComputed), true);
+        q.equal(ko.isComputed(vm.WritableComputed), true);
+
+        q.equal(vm.NewValue(), 999, "Should be added as 999");
+        q.equal(vm.ValueType, 2, "Should change to 2");
+        q.equal(vm.Observed(), "xyz", "Should change to xyz");
+        q.equal(vm.ReadOnlyComputed(), "foo", "Should remain as 'foo'");
+        q.equal(vm.WritableComputed(), 2, "Should change to 2");
+
     });
 
 })(QUnit, Ginger, ko);

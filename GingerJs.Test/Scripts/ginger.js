@@ -30,7 +30,7 @@
         };
     }
 
-    function includeProperties(model, map) {
+    function includeModelProperties(model, map) {
         var defaults = ko.mapping.defaultOptions();
         var include = map.include || [];
         for (var mapProp in map) {
@@ -47,22 +47,6 @@
         map.include = include;
     }
 
-    //function ignoreProperties(data, map) {
-    //    var defaults = ko.mapping.defaultOptions();
-    //    if (typeof map.ignore == "undefined" || map.ignore == defaults.ignore) {
-    //        var ignore = [];
-    //        for (var prop in data) {
-    //            var value = ko.utils.unwrapObservable(data[prop]);
-    //            if (typeof value != "function" &&
-    //                $.inArray(prop, defaults.ignore) < 0 &&
-    //                $.inArray(prop, map.include) < 0) {
-    //                ignore.push(prop);
-    //            }
-    //        }
-    //        map.ignore = ignore;
-    //    }
-    //}
-
     function GingerModelParams(map, dataAccess, ui) {
 
         function getObjOrFunc(prop) {
@@ -78,21 +62,36 @@
     Ginger.bindModel = function(model, map, dataAccess, ui) {
         return Ginger.bindModelWithBase(model, null, map, dataAccess, ui);
     };
-    
+
+    function isReadOnlyComputed(value) {
+        if (!ko.isComputed(value)) return false;
+        return ko.isComputed(value) && !ko.isWriteableObservable(value);
+    }
+
+    function removeReadOnlyComputedProperties(data) {
+        var valid = {};
+        for (var prop in data) {
+            if (!isReadOnlyComputed(this[prop]))
+                valid[prop] = data[prop];
+        }
+        return valid;
+    }
+
     Ginger.bindModelWithBase = function(model, base, map, dataAccess, ui) {
         if (base) {
             model.prototype = base.prototype;
             model.prototype.constructor = base;
         }
-        
+
         function GingerModel(data, values, isBase) {
-            if (typeof values == "undefined" || values == null)
+            if (typeof values == "undefined" || values == null) {
                 values = new GingerModelParams();
+            }
             GingerModelParams.call(values, map, dataAccess, ui);
             if (base) base.call(this, data, values, true);
             model.call(this, values.dataAccess, values.ui);
-            if (settings.autoProperty) includeProperties(this, values.map);
-            //if( settings.autoProperty ) ignoreProperties( data, values.map );
+            if (settings.autoProperty) includeModelProperties(this, values.map);
+            data = removeReadOnlyComputedProperties.call(this, data);
             if (typeof this.load == "function") values.load.push(this.load);
             if (!isBase) {
                 ko.mapping.fromJS(data, values.map, this);

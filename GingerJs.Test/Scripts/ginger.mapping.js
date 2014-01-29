@@ -2,7 +2,7 @@
 /// <reference path="ginger.js" />
 (function(ginger) {
 
-    function GingerMap(createMap) {
+    function GingerMap(model) {
         var self = this;
 
         function getProp(prop) {
@@ -17,16 +17,14 @@
             };
         }
 
-        function addPropMap(prop, map, type) {
-            var propModel = createMap[createProp];
-            if (typeof propModel == "undefined")
-                throw "'" + createProp + "': map is undefined";
-            setFn(propModel, createProp, type);
-        }
+	    for (var prop in model) {
+		    var propModel = model[prop];
+		    if (typeof propModel == "undefined")
+			    throw "'" + prop + "': map is undefined";
 
-        for (var createProp in createMap) {
-            addPropMap(createProp, createMap, 'create');
-        }
+		    if (prop == "ignore") self[prop] = model[prop];
+		    else setFn(propModel, prop, 'create');
+	    }
     }
 
     ginger.Map = GingerMap;

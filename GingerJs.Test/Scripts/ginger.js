@@ -12,6 +12,7 @@
         settings = {
             pageContainer: "body",
             autoProperty: true,
+            includeComputed: false
         };
 
     Ginger.settings = function(options) {
@@ -37,7 +38,10 @@
             include.push(mapProp);
         }
         for (var prop in model) {
-            var value = ko.isComputed(model[prop]) ? null : ko.utils.unwrapObservable(model[prop]);
+            var modelVal = model[prop];
+            var isComputed = ko.isComputed(modelVal);
+            if (!settings.includeComputed && isComputed) continue;
+            var value = isComputed ? null : ko.utils.unwrapObservable(modelVal);
             if (typeof value != "function"
                 && $.inArray(prop, defaults.ignore) < 0
                 && $.inArray(prop, include) < 0) {

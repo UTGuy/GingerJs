@@ -1,5 +1,11 @@
 ﻿(function($, ko) {
 
+	var koDependantObservable = ko.dependentObservable;
+	// Fixes an issue with the mapping-latest plugin re-assigning ko.dependentObservable
+	function koIsComputed(instance) {
+		return ko.hasPrototype(instance, koDependantObservable);
+	}
+	
     // Assigns a new var to the window namespace
     this.Ginger = function() {
     };
@@ -39,7 +45,7 @@
         }
         for (var prop in model) {
             var modelVal = model[prop];
-            var isComputed = ko.isComputed(modelVal);
+            var isComputed = koIsComputed(modelVal);
             if (!settings.includeComputed && isComputed) continue;
             var value = isComputed ? null : ko.utils.unwrapObservable(modelVal);
             if (typeof value != "function"
